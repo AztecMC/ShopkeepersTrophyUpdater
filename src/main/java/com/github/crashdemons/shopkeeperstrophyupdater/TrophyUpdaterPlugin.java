@@ -118,7 +118,7 @@ public class TrophyUpdaterPlugin extends JavaPlugin implements Listener {
             debug(" - not a player's head: "+headType);
             ItemStack newStack = ph_api.getHeadItem(headType, stack.getAmount());
             if(newStack==null ){
-                getLogger().warning("new head stack was null - this shouldnt happen "+headType);
+                //getLogger().warning("new head stack was null - this shouldnt happen "+headType);
                 return stack;
             }
             return newStack;
@@ -130,7 +130,7 @@ public class TrophyUpdaterPlugin extends JavaPlugin implements Listener {
         debug(" - trophy detected "+trophyType);
         ItemStack newStack  = mt.createTrophyDrop(trophyType);
         if(newStack==null ){
-            getLogger().warning("new trophy stack was null - this shouldnt happen");
+            //getLogger().warning("new trophy stack was null - this shouldnt happen");
             return stack;
         }
         newStack.setAmount(stack.getAmount());
@@ -165,7 +165,7 @@ public class TrophyUpdaterPlugin extends JavaPlugin implements Listener {
             
             TradingOffer newOffer = ShopkeepersAPI.createTradingOffer(stackResult, stack1, stack2);
             if(newOffer==null){
-                getLogger().warning("ShopkeepersAPI.createTradingOffer returned null - shouldn't happen");
+                //getLogger().warning("ShopkeepersAPI.createTradingOffer returned null - shouldn't happen");
             }
             newOffers.add(newOffer);
         }
