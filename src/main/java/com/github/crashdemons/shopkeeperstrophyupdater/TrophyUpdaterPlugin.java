@@ -18,6 +18,7 @@ import com.nisovin.shopkeepers.api.shopkeeper.admin.regular.RegularAdminShopkeep
 import com.nisovin.shopkeepers.api.shopkeeper.offers.TradingOffer;
 import java.util.ArrayList;
 import java.util.List;
+import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -102,29 +103,42 @@ public class TrophyUpdaterPlugin extends JavaPlugin implements Listener {
         //saveConfig();
 
         //Cleanup here
-        getLogger().info("Disabled.");
+        debug("Disabled.");
+    }
+    
+    public void debug(String s){
+        //getLogger().info(s);
     }
     
     private ItemStack updateHead(HeadType headType, ItemStack stack){
-        if(headType.equals(ph_player)){
-            getLogger().info(" - player's head: "+headType);
+        if(headType==null || headType.equals(ph_player)){
+            debug(" - player's head or null: "+headType);
             return stack;
         }else{
-            getLogger().info(" - not a player's head: "+headType);
+            debug(" - not a player's head: "+headType);
             ItemStack newStack = ph_api.getHeadItem(headType, stack.getAmount());
+            if(newStack==null ){
+                getLogger().warning("new head stack was null - this shouldnt happen "+headType);
+                return stack;
+            }
             return newStack;
         }
     }
     
     private ItemStack updateTrophy(TrophyType trophyType, ItemStack stack){
-        getLogger().info(" - trophy detected "+trophyType);
+        if(trophyType==null) return stack;
+        debug(" - trophy detected "+trophyType);
         ItemStack newStack  = mt.createTrophyDrop(trophyType);
+        if(newStack==null ){
+            getLogger().warning("new trophy stack was null - this shouldnt happen");
+            return stack;
+        }
         newStack.setAmount(stack.getAmount());
         return newStack;
     }
     
     private ItemStack updateItem(ItemStack stack){
-        if(stack==null || stack.getType().isAir()) return stack;
+        if(stack==null || stack.getType().isAir()){ return stack; }
         if(hasPH){
             HeadType head = ph_api.getHeadFrom(stack);
             if(head!=null) return updateHead(head, stack);
@@ -133,7 +147,7 @@ public class TrophyUpdaterPlugin extends JavaPlugin implements Listener {
             TrophyType trophyType = TrophyType.identifyTrophyItem(stack);
             if(trophyType!=null) return updateTrophy(trophyType,stack);
         }
-        getLogger().info("   unidentified item, skipping "+stack.getType());
+        debug("   unidentified item, skipping "+stack.getType());
         return stack;
     }
     
@@ -143,33 +157,42 @@ public class TrophyUpdaterPlugin extends JavaPlugin implements Listener {
             ItemStack stack1 = updateItem(offer.getItem1());
             ItemStack stack2 = updateItem(offer.getItem2());
             ItemStack stackResult = updateItem(offer.getResultItem());
+            
+            if(stack1==null || stack2==null || stackResult==null){
+                //from testing, trades have null entries in empty slots anyway...
+                //getLogger().warning("updated stack was null "+stack1+", "+stack2+", "+stackResult);
+            }
+            
             TradingOffer newOffer = ShopkeepersAPI.createTradingOffer(stackResult, stack1, stack2);
+            if(newOffer==null){
+                getLogger().warning("ShopkeepersAPI.createTradingOffer returned null - shouldn't happen");
+            }
             newOffers.add(newOffer);
         }
         return newOffers;
     }
 
     private void onShopkeeper(Shopkeeper shopkeeper){
-        getLogger().info(" Shop detected "+shopkeeper);
+        debug(" Shop detected "+shopkeeper);
         if(shopkeeper instanceof RegularAdminShopkeeper){
-            getLogger().info("   was a regular admin shopkeeper");
+            debug("   was a regular admin shopkeeper");
             RegularAdminShopkeeper adminShopkeeper = (RegularAdminShopkeeper) shopkeeper;
             List<TradingOffer> offers = adminShopkeeper.getOffers();
             offers = updateOffers(offers);
             adminShopkeeper.setOffers(offers);
         }else{
-            getLogger().info("   was NOT a regular admin shopkeeper");
+            debug("   was NOT a regular admin shopkeeper");
         }
     }
     
     @EventHandler(ignoreCancelled=true)
     public void onShopkeeperAdd(ShopkeeperAddedEvent event){
-        getLogger().info("Shop Added");
+        debug("Shop Added");
         onShopkeeper(event.getShopkeeper());
     }
     @EventHandler(ignoreCancelled=true)
     public void onShopkeeperAdd(ShopkeeperEditedEvent event){
-        getLogger().info("Shop Edited");
+        debug("Shop Edited");
         onShopkeeper(event.getShopkeeper());
     }
     
