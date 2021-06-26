@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<project name="maven-antrun-" default="main"  >
-<target name="main">
-  <copy file="C:\Users\User\Documents\NetBeansProjects\ShopkeepersTrophyUpdater\target/ShopkeepersTrophyUpdater-0.0.1-SNAPSHOT.jar" tofile="C:\Users\User\Documents\NetBeansProjects\ShopkeepersTrophyUpdater\target/ShopkeepersTrophyUpdater.jar"/>
-</target>
-</project>
