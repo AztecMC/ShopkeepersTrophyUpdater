@@ -15,7 +15,7 @@ import com.nisovin.shopkeepers.api.events.ShopkeeperAddedEvent;
 import com.nisovin.shopkeepers.api.events.ShopkeeperEditedEvent;
 import com.nisovin.shopkeepers.api.shopkeeper.Shopkeeper;
 import com.nisovin.shopkeepers.api.shopkeeper.admin.regular.RegularAdminShopkeeper;
-import com.nisovin.shopkeepers.api.shopkeeper.offers.TradingOffer;
+import com.nisovin.shopkeepers.api.shopkeeper.offers.TradeOffer;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.Material;
@@ -151,21 +151,22 @@ public class TrophyUpdaterPlugin extends JavaPlugin implements Listener {
         return stack;
     }
     
-    private List<TradingOffer> updateOffers(List<TradingOffer> offers){
-        List<TradingOffer> newOffers = new ArrayList<TradingOffer>();
-        for(TradingOffer offer : offers){
-            ItemStack stack1 = updateItem(offer.getItem1());
-            ItemStack stack2 = updateItem(offer.getItem2());
-            ItemStack stackResult = updateItem(offer.getResultItem());
+    private List<TradeOffer> updateOffers(List<? extends TradeOffer> offers){
+        List<TradeOffer> newOffers = new ArrayList<TradeOffer>();
+        for(TradeOffer offer : offers){
+            
+            ItemStack stack1 = updateItem(offer.getItem1().copy());
+            ItemStack stack2 = updateItem(offer.getItem2().copy());
+            ItemStack stackResult = updateItem(offer.getResultItem().copy());
             
             if(stack1==null || stack2==null || stackResult==null){
                 //from testing, trades have null entries in empty slots anyway...
                 //getLogger().warning("updated stack was null "+stack1+", "+stack2+", "+stackResult);
             }
             
-            TradingOffer newOffer = ShopkeepersAPI.createTradingOffer(stackResult, stack1, stack2);
+            TradeOffer newOffer = TradeOffer.create(stackResult, stack1, stack2);
             if(newOffer==null){
-                //getLogger().warning("ShopkeepersAPI.createTradingOffer returned null - shouldn't happen");
+                //getLogger().warning("ShopkeepersAPI.createTradeOffer returned null - shouldn't happen");
             }
             newOffers.add(newOffer);
         }
@@ -177,7 +178,7 @@ public class TrophyUpdaterPlugin extends JavaPlugin implements Listener {
         if(shopkeeper instanceof RegularAdminShopkeeper){
             debug("   was a regular admin shopkeeper");
             RegularAdminShopkeeper adminShopkeeper = (RegularAdminShopkeeper) shopkeeper;
-            List<TradingOffer> offers = adminShopkeeper.getOffers();
+            List<? extends TradeOffer> offers = adminShopkeeper.getOffers();
             offers = updateOffers(offers);
             adminShopkeeper.setOffers(offers);
         }else{
