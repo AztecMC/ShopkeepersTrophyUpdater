@@ -10,6 +10,8 @@ import com.github.crashdemons.miningtrophies.TrophyType;
 import com.github.crashdemons.playerheads.api.HeadType;
 import com.github.crashdemons.playerheads.api.PlayerHeads;
 import com.github.crashdemons.playerheads.api.PlayerHeadsAPI;
+import com.github.crashdemons.trophyrecipes.TrophyRecipesAPI;
+import com.github.crashdemons.trophyrecipes.crafting.ItemResult;
 import com.nisovin.shopkeepers.api.ShopkeepersAPI;
 import com.nisovin.shopkeepers.api.events.ShopkeeperAddedEvent;
 import com.nisovin.shopkeepers.api.events.ShopkeeperEditedEvent;
@@ -18,7 +20,6 @@ import com.nisovin.shopkeepers.api.shopkeeper.admin.regular.RegularAdminShopkeep
 import com.nisovin.shopkeepers.api.shopkeeper.offers.TradeOffer;
 import java.util.ArrayList;
 import java.util.List;
-import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -32,12 +33,14 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class TrophyUpdaterPlugin extends JavaPlugin implements Listener {
     public TrophyUpdaterPlugin instance = null;
-    public boolean hasSK = false, hasPH = false, hasMT = false;
+    public boolean hasSK = false, hasPH = false, hasMT = false, hasTR=false;
     
     PlayerHeadsAPI ph_api;
     HeadType ph_player;
     
     MiningTrophies mt;
+    
+    //TrophyRecipesPlugin tr;
     
     
     @Override
@@ -54,6 +57,8 @@ public class TrophyUpdaterPlugin extends JavaPlugin implements Listener {
         hasSK = this.getServer().getPluginManager().getPlugin("Shopkeepers") != null;
         hasPH = this.getServer().getPluginManager().getPlugin("PlayerHeads") != null;
         hasMT = this.getServer().getPluginManager().getPlugin("MiningTrophies") != null;
+        hasTR = this.getServer().getPluginManager().getPlugin("TrophyRecipes") != null;
+        
         
         if(!hasSK){
             getLogger().severe("Cannot run without Shopkeepers support - disabling");
@@ -68,6 +73,7 @@ public class TrophyUpdaterPlugin extends JavaPlugin implements Listener {
         }
         if(hasPH) getLogger().info("PlayerHeads detected");
         if(hasMT) getLogger().info("MiningTrophies detected");
+        if(hasTR) getLogger().info("TrophyRecipes detected");
         
         //ready
         /*
@@ -83,6 +89,9 @@ public class TrophyUpdaterPlugin extends JavaPlugin implements Listener {
         }
         if(hasMT){
             mt = (MiningTrophies) this.getServer().getPluginManager().getPlugin("MiningTrophies");
+        }
+        if(hasTR){
+            //tr = (TrophyRecipesPlugin) this.getServer().getPluginManager().getPlugin("TrophyRecipes");
         }
         
         getLogger().info("Updating loaded shops...");
@@ -125,6 +134,7 @@ public class TrophyUpdaterPlugin extends JavaPlugin implements Listener {
         }
     }
     
+
     private ItemStack updateTrophy(TrophyType trophyType, ItemStack stack){
         if(trophyType==null) return stack;
         debug(" - trophy detected "+trophyType);
@@ -146,6 +156,15 @@ public class TrophyUpdaterPlugin extends JavaPlugin implements Listener {
         if(hasMT){
             TrophyType trophyType = TrophyType.identifyTrophyItem(stack);
             if(trophyType!=null) return updateTrophy(trophyType,stack);
+        }
+        if(hasTR){
+            ItemResult TRResult = TrophyRecipesAPI.updateItem(stack);
+            switch(TRResult.action){
+                case CANCEL_RESULT:
+                    return null;
+                case SET_RESULT:
+                    return TRResult.resultItem;
+            }
         }
         debug("   unidentified item, skipping "+stack.getType());
         return stack;
