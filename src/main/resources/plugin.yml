@@ -6,7 +6,7 @@ api-version: 1.13
 description: Example Plugin
 
 depend: [Shopkeepers]
-softdepend: [PlayerHeads, MiningTrophies]
+softdepend: [PlayerHeads, MiningTrophies, TrophyRecipes]
 
 
 #commands:
