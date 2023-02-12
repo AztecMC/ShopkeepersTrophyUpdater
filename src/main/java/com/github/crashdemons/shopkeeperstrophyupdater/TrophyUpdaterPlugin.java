@@ -18,6 +18,7 @@ import com.nisovin.shopkeepers.api.events.ShopkeeperEditedEvent;
 import com.nisovin.shopkeepers.api.shopkeeper.Shopkeeper;
 import com.nisovin.shopkeepers.api.shopkeeper.admin.regular.RegularAdminShopkeeper;
 import com.nisovin.shopkeepers.api.shopkeeper.offers.TradeOffer;
+import com.nisovin.shopkeepers.api.util.UnmodifiableItemStack;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.entity.EntityType;
@@ -170,13 +171,31 @@ public class TrophyUpdaterPlugin extends JavaPlugin implements Listener {
         return stack;
     }
     
+    private ItemStack copyTradeItem1(TradeOffer offer){
+        UnmodifiableItemStack stack_original = offer.getItem1();
+        if(stack_original==null) return null;
+        return stack_original.copy();
+    }
+    
+    private ItemStack copyTradeItem2(TradeOffer offer){
+        UnmodifiableItemStack stack_original = offer.getItem2();
+        if(stack_original==null) return null;
+        return stack_original.copy();
+    }
+    
+    private ItemStack copyTradeResult(TradeOffer offer){
+        UnmodifiableItemStack stack_original = offer.getResultItem();
+        if(stack_original==null) return null;
+        return stack_original.copy();
+    }
+    
     private List<TradeOffer> updateOffers(List<? extends TradeOffer> offers){
         List<TradeOffer> newOffers = new ArrayList<TradeOffer>();
         for(TradeOffer offer : offers){
             
-            ItemStack stack1 = updateItem(offer.getItem1().copy());
-            ItemStack stack2 = updateItem(offer.getItem2().copy());
-            ItemStack stackResult = updateItem(offer.getResultItem().copy());
+            ItemStack stack1 = updateItem(copyTradeItem1(offer));
+            ItemStack stack2 = updateItem(copyTradeItem2(offer));
+            ItemStack stackResult = updateItem(copyTradeResult(offer));
             
             if(stack1==null || stack2==null || stackResult==null){
                 //from testing, trades have null entries in empty slots anyway...
